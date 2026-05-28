@@ -1,0 +1,106 @@
+---
+/**
+ * PullQuote — editorial pull quote used inside long-form prose to highlight a
+ * cost range, a key statute summary, or an attention-grabbing factual point.
+ *
+ * Variants:
+ *   - 'cost'   — for dollar ranges
+ *   - 'figure' — for stat/figure callouts
+ *   - 'quote'  — for actual quotations
+ */
+export interface Props {
+  variant?: 'cost' | 'figure' | 'quote';
+  label?: string;      /* small label above (e.g., "Typical range") */
+  attribution?: string; /* who said it (only for quote variant) */
+}
+
+const { variant = 'figure', label, attribution } = Astro.props;
+---
+
+<aside class:list={['pull-quote', `pull-quote--${variant}`]}>
+  {label && <p class="pull-quote__label">{label}</p>}
+  <div class="pull-quote__content">
+    {variant === 'quote' && <span class="pull-quote__mark" aria-hidden="true">"</span>}
+    <slot />
+  </div>
+  {attribution && <p class="pull-quote__attribution">— {attribution}</p>}
+</aside>
+
+<style>
+  .pull-quote {
+    margin-block: var(--space-10);
+    padding: var(--space-7) var(--space-6);
+    background: var(--color-tint-warm);
+    border-radius: var(--radius-md);
+    position: relative;
+    text-align: left;
+  }
+
+  .pull-quote--cost {
+    background: color-mix(in srgb, var(--color-accent-warm) 6%, var(--color-paper));
+    border-left: 4px solid var(--color-accent-warm);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  }
+
+  .pull-quote--quote {
+    background: var(--color-tint-cool);
+    border-left: 4px solid var(--color-accent);
+    font-style: italic;
+  }
+
+  .pull-quote__label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    color: var(--color-accent-warm);
+    margin: 0 0 var(--space-3);
+  }
+
+  .pull-quote__content {
+    font-family: var(--font-display);
+    font-variation-settings: 'wght' 400, 'opsz' 64, 'wonk' 1;
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-ink);
+  }
+
+  .pull-quote--cost .pull-quote__content {
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    color: var(--color-accent);
+    font-variation-settings: 'wght' 500, 'opsz' 80, 'wonk' 0;
+  }
+
+  .pull-quote--figure .pull-quote__content {
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  }
+
+  .pull-quote--quote .pull-quote__content {
+    font-size: var(--text-xl);
+    color: var(--color-ink);
+    font-variation-settings: 'wght' 400, 'opsz' 40, 'wonk' 1;
+    position: relative;
+    padding-top: var(--space-5);
+  }
+
+  .pull-quote__mark {
+    position: absolute;
+    top: -var(--space-2);
+    left: -var(--space-2);
+    font-family: var(--font-display);
+    font-size: 4rem;
+    line-height: 1;
+    color: var(--color-accent-warm);
+    opacity: 0.4;
+    font-style: normal;
+  }
+
+  .pull-quote__attribution {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    color: var(--color-ink-muted);
+    margin: var(--space-4) 0 0;
+    font-style: normal;
+  }
+</style>

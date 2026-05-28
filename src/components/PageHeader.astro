@@ -1,0 +1,117 @@
+---
+/**
+ * PageHeader — top-of-article header used by every page-type layout.
+ * Renders the kicker (page type label), H1 title, byline, and optional sub.
+ */
+import Byline from './Byline.astro';
+
+export interface Props {
+  kicker: string;          /* e.g., "Cost Article", "FAQ", "Process Guide" */
+  title: string;
+  sub?: string;
+  reviewedBy?: string;
+  lastUpdated?: string;
+  aiAssisted?: boolean;
+  geo?: string;
+  jurisdiction?: string;
+}
+
+const { kicker, title, sub, reviewedBy, lastUpdated, aiAssisted, geo, jurisdiction } = Astro.props;
+---
+
+<header class="page-header">
+  <div class="container">
+    <div class="page-header__inner">
+      <div class="page-header__meta-row rise rise-1">
+        <span class="page-header__kicker">{kicker}</span>
+        {(geo || jurisdiction) && (
+          <span class="page-header__geo">
+            {geo && <span>{geo}</span>}
+            {geo && jurisdiction && <span class="page-header__sep" aria-hidden="true">•</span>}
+            {jurisdiction && <span>Jurisdiction: {jurisdiction}</span>}
+          </span>
+        )}
+      </div>
+
+      <h1 class="page-header__title rise rise-2">{title}</h1>
+
+      {sub && <p class="page-header__sub rise rise-3">{sub}</p>}
+
+      <div class="rise rise-4">
+        <Byline reviewedBy={reviewedBy} lastUpdated={lastUpdated} aiAssisted={aiAssisted} />
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  .page-header {
+    padding-block: var(--space-16) var(--space-6);
+    border-bottom: 1px solid var(--color-rule);
+    background:
+      linear-gradient(180deg,
+        color-mix(in srgb, var(--color-tint-warm) 80%, var(--color-ground)) 0%,
+        var(--color-ground) 100%);
+  }
+  @media (min-width: 1024px) {
+    .page-header { padding-block: var(--space-20) var(--space-8); }
+  }
+
+  .page-header__inner {
+    max-width: var(--container-narrow);
+    margin-inline: auto;
+  }
+
+  .page-header__meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+
+  .page-header__kicker {
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-widest);
+    text-transform: uppercase;
+    color: var(--color-accent-warm);
+    background: var(--color-paper);
+    padding: var(--space-2) var(--space-3);
+    border-radius: 999px;
+    border: 1px solid var(--color-rule);
+  }
+
+  .page-header__geo {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-ink-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .page-header__sep { color: var(--color-rule-strong); }
+
+  .page-header__title {
+    font-family: var(--font-display);
+    font-size: clamp(2.25rem, 5vw, 3.75rem);
+    font-variation-settings: 'wght' 500, 'opsz' 96, 'wonk' 1;
+    line-height: 1.05;
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-ink);
+    margin-bottom: var(--space-6);
+    text-wrap: balance;
+    max-width: 22ch;
+  }
+
+  .page-header__sub {
+    font-family: var(--font-body);
+    font-size: var(--text-lg);
+    line-height: var(--leading-relaxed);
+    color: var(--color-ink-soft);
+    margin-bottom: var(--space-8);
+    max-width: 42ch;
+  }
+</style>

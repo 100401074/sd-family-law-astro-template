@@ -1,0 +1,107 @@
+---
+/**
+ * StatuteCard — small inline card that highlights a cited California statute.
+ * Used in marginalia on Explainer / Process Guide layouts; can also be inlined
+ * inside the article prose where a statute deserves a callout.
+ *
+ * Visual: light navy tint background, terracotta left rule, mono statute code,
+ * leginfo link with last_verified date in small mono type. Tactile, scholarly.
+ */
+export interface Props {
+  citation: string;       /* e.g., "Cal. Fam. Code § 2320" */
+  url?: string;           /* leginfo URL */
+  lastVerified?: string;  /* ISO date */
+  caption?: string;       /* one-line plain-English summary */
+}
+
+const { citation, url, lastVerified, caption } = Astro.props;
+
+const dateFormatted = lastVerified
+  ? new Date(lastVerified).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+  : null;
+---
+
+<aside class="statute-card">
+  <div class="statute-card__head">
+    <span class="statute-card__label">Statute cited</span>
+    {dateFormatted && (
+      <span class="statute-card__verified" title="Verified against leginfo on this date.">
+        verified {dateFormatted}
+      </span>
+    )}
+  </div>
+  <div class="statute-card__citation">
+    {url ? (
+      <a href={url} target="_blank" rel="noopener noreferrer">
+        {citation}
+        <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M4 2 H10 V8 M10 2 L4 8" stroke-linecap="round"/>
+        </svg>
+      </a>
+    ) : (
+      <span>{citation}</span>
+    )}
+  </div>
+  {caption && <p class="statute-card__caption">{caption}</p>}
+</aside>
+
+<style>
+  .statute-card {
+    background: var(--color-tint-accent);
+    border-left: 3px solid var(--color-accent-warm);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: var(--space-4) var(--space-5);
+    margin-block: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .statute-card__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+  .statute-card__verified {
+    color: var(--color-accent-warm);
+    text-transform: none;
+    letter-spacing: var(--tracking-wide);
+  }
+
+  .statute-card__citation {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-accent);
+    line-height: 1.4;
+  }
+  .statute-card__citation a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-accent);
+    background: none !important;
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--duration-quick) var(--easing-soft), color var(--duration-quick) var(--easing-soft);
+  }
+  .statute-card__citation a:hover {
+    color: var(--color-accent-warm);
+    border-bottom-color: var(--color-accent-warm);
+  }
+
+  .statute-card__caption {
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--color-ink-soft);
+    margin: 0;
+    font-style: italic;
+  }
+</style>

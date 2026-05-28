@@ -1,0 +1,178 @@
+---
+/**
+ * [...slug].astro — dynamic catch-all route for all engine-generated articles.
+ *
+ * One file renders every page type by branching on `data.page_type` from the
+ * article frontmatter and choosing the right layout + body treatment.
+ *
+ * At build time, Astro statically renders one HTML file per article in the
+ * `articles` collection — full static output, no SSR required.
+ */
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import ArticleLayout from '../../layouts/ArticleLayout.astro';
+import PillarLayout from '../../layouts/PillarLayout.astro';
+import FAQAccordion from '../../components/FAQAccordion.astro';
+import ComparisonSpread from '../../components/ComparisonSpread.astro';
+import ProcessTimeline from '../../components/ProcessTimeline.astro';
+import SanDiegoMap from '../../components/SanDiegoMap.astro';
+import SourcesList from '../../components/SourcesList.astro';
+import { buildSchemas } from '../../lib/schema';
+import { resolveInternalLinks } from '../../lib/resolveInternalLinks';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles');
+  return articles.map((article) => ({
+    params: { slug: article.id },
+    props: { article },
+  }));
+}
+
+type Props = { article: CollectionEntry<'articles'> };
+const { article } = Astro.props;
+const { Content, headings } = await render(article);
+const data = article.data;
+
+// Map page_type → kicker label
+const PAGE_KICKERS: Record<string, string> = {
+  'cost-article': 'Cost Article',
+  'explainer': 'Explainer',
+  'faq': 'Frequently Asked Questions',
+  'comparison': 'Comparison',
+  'process-guide': 'Process Guide',
+  'city-page': 'City Page',
+  'landing': 'Practice Area',
+  'pillar': 'Pillar Guide',
+};
+const kicker = PAGE_KICKERS[data.page_type] ?? data.page_type;
+
+// All article collection items for internal-link resolution
+const allArticles = await getCollection('articles');
+
+// Build JSON-LD
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site).toString();
+const ogImage = data.og_image
+  ? (data.og_image.startsWith('http') ? data.og_image : new URL(data.og_image, Astro.site).toString())
+  : new URL('/og-default.jpg', Astro.site).toString();
+
+const jsonLd = buildSchemas({
+  title: data.title,
+  description: data.description,
+  url: canonicalUrl,
+  image: ogImage,
+  datePublished: data.date_published,
+  dateModified: data.date_reviewed,
+  reviewedBy: data.reviewed_by,
+  isPillar: data.is_pillar ?? false,
+  schemaTypes: data.schema_types,
+  faqItems: data.faq_items,
+  speakableSelectors: data.speakable_selectors,
+  howToSteps: data.process_steps?.map((s) => ({ title: s.title, text: s.body })),
+});
+
+const commonProps = {
+  title: data.title,
+  description: data.description,
+  kicker,
+  reviewedBy: data.reviewed_by,
+  lastUpdated: data.date_reviewed,
+  aiAssisted: data.ai_assisted,
+  geo: data.geographic_focus,
+  jurisdiction: data.jurisdiction,
+  jsonLd,
+};
+---
+
+{data.page_type === 'pillar' ? (
+  <PillarLayout {...commonProps} headings={headings}>
+    <Content />
+    {data.statutes_cited && data.statutes_cited.length > 0 && (
+      <SourcesList sources={data.statutes_cited.map((s) => ({
+        citation: s.citation,
+        url: s.url,
+        lastVerified: s.last_verified,
+      }))} />
+    )}
+  </PillarLayout>
+) : data.page_type === 'faq' ? (
+  <ArticleLayout {...commonProps}>
+    <Content />
+    {data.faq_items && data.faq_items.length > 0 && (
+      <FAQAccordion items={data.faq_items} />
+    )}
+    {data.statutes_cited && data.statutes_cited.length > 0 && (
+      <SourcesList sources={data.statutes_cited.map((s) => ({
+        citation: s.citation,
+        url: s.url,
+        lastVerified: s.last_verified,
+      }))} />
+    )}
+  </ArticleLayout>
+) : data.page_type === 'comparison' ? (
+  <ArticleLayout {...commonProps}>
+    <Content />
+    {data.comparison && (
+      <ComparisonSpread optionA={data.comparison.a} optionB={data.comparison.b} />
+    )}
+    {data.statutes_cited && data.statutes_cited.length > 0 && (
+      <SourcesList sources={data.statutes_cited.map((s) => ({
+        citation: s.citation,
+        url: s.url,
+        lastVerified: s.last_verified,
+      }))} />
+    )}
+  </ArticleLayout>
+) : data.page_type === 'process-guide' ? (
+  <ArticleLayout {...commonProps}>
+    <Content />
+    {data.process_steps && data.process_steps.length > 0 && (
+      <ProcessTimeline steps={data.process_steps} />
+    )}
+    {data.statutes_cited && data.statutes_cited.length > 0 && (
+      <SourcesList sources={data.statutes_cited.map((s) => ({
+        citation: s.citation,
+        url: s.url,
+        lastVerified: s.last_verified,
+      }))} />
+    )}
+  </ArticleLayout>
+) : data.page_type === 'city-page' ? (
+  <ArticleLayout {...commonProps}>
+    <div class="city-page-intro">
+      <SanDiegoMap />
+    </div>
+    <Content />
+    {data.statutes_cited && data.statutes_cited.length > 0 && (
+      <SourcesList sources={data.statutes_cited.map((s) => ({
+        citation: s.citation,
+        url: s.url,
+        lastVerified: s.last_verified,
+      }))} />
+    )}
+  </ArticleLayout>
+) : (
+  <ArticleLayout {...commonProps}>
+    <Content />
+    {data.statutes_cited && data.statutes_cited.length > 0 && (
+      <SourcesList sources={data.statutes_cited.map((s) => ({
+        citation: s.citation,
+        url: s.url,
+        lastVerified: s.last_verified,
+      }))} />
+    )}
+  </ArticleLayout>
+)}
+
+<style>
+  .city-page-intro {
+    margin-bottom: var(--space-10);
+    max-width: 400px;
+  }
+  @media (min-width: 1024px) {
+    .city-page-intro {
+      float: right;
+      margin-left: var(--space-8);
+      margin-bottom: var(--space-6);
+      max-width: 360px;
+    }
+  }
+</style>

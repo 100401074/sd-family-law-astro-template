@@ -1,0 +1,101 @@
+---
+/**
+ * PillarLayout — long-form authority articles with sticky TOC sidebar.
+ * Two-column on desktop (TOC left, body right); single-column on mobile.
+ */
+import BaseLayout from './BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import FootBlock from '../components/FootBlock.astro';
+import CTABlock from '../components/CTABlock.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+
+export interface Props {
+  title: string;
+  description: string;
+  kicker: string;
+  sub?: string;
+  reviewedBy?: string;
+  lastUpdated?: string;
+  aiAssisted?: boolean;
+  geo?: string;
+  jurisdiction?: string;
+  headings?: { depth: number; slug: string; text: string }[];
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const props = Astro.props;
+const headings = props.headings ?? [];
+---
+
+<BaseLayout
+  title={props.title}
+  description={props.description}
+  jsonLd={props.jsonLd}
+>
+  <PageHeader
+    kicker={props.kicker}
+    title={props.title}
+    sub={props.sub}
+    reviewedBy={props.reviewedBy}
+    lastUpdated={props.lastUpdated}
+    aiAssisted={props.aiAssisted}
+    geo={props.geo}
+    jurisdiction={props.jurisdiction}
+  />
+
+  <div class="pillar">
+    <div class="container">
+      <div class="pillar__grid">
+        <aside class="pillar__sidebar">
+          <div class="pillar__sticky">
+            <TableOfContents headings={headings} />
+          </div>
+        </aside>
+
+        <article class="pillar__body prose">
+          <slot />
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <FootBlock
+    reviewedBy={props.reviewedBy}
+    lastUpdated={props.lastUpdated}
+  />
+
+  <CTABlock id="consultation" />
+</BaseLayout>
+
+<style>
+  .pillar {
+    padding-block: var(--space-12) var(--space-8);
+  }
+  @media (min-width: 1024px) {
+    .pillar { padding-block: var(--space-16) var(--space-12); }
+  }
+
+  .pillar__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-10);
+  }
+  @media (min-width: 1024px) {
+    .pillar__grid {
+      grid-template-columns: 260px 1fr;
+      gap: var(--space-16);
+    }
+  }
+
+  .pillar__sidebar { order: -1; }
+  @media (min-width: 1024px) { .pillar__sidebar { order: 0; } }
+
+  .pillar__sticky {
+    position: sticky;
+    top: 100px;
+  }
+
+  .pillar__body {
+    max-width: var(--container-text);
+  }
+</style>

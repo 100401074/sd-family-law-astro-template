@@ -1,0 +1,75 @@
+---
+/**
+ * ArticleLayout — universal layout used for cost, explainer, and city pages.
+ * Renders the page header (kicker + title + byline), the article body inside
+ * a centered reading column, the foot block, and the CTA block.
+ *
+ * Specialized layouts (FAQLayout, ComparisonLayout, ProcessLayout, etc.)
+ * wrap this same structure with type-specific body components.
+ */
+import BaseLayout from './BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
+import FootBlock from '../components/FootBlock.astro';
+import CTABlock from '../components/CTABlock.astro';
+
+export interface Props {
+  title: string;
+  description: string;
+  kicker: string;
+  sub?: string;
+  reviewedBy?: string;
+  lastUpdated?: string;
+  aiAssisted?: boolean;
+  geo?: string;
+  jurisdiction?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const props = Astro.props;
+---
+
+<BaseLayout
+  title={props.title}
+  description={props.description}
+  jsonLd={props.jsonLd}
+>
+  <PageHeader
+    kicker={props.kicker}
+    title={props.title}
+    sub={props.sub}
+    reviewedBy={props.reviewedBy}
+    lastUpdated={props.lastUpdated}
+    aiAssisted={props.aiAssisted}
+    geo={props.geo}
+    jurisdiction={props.jurisdiction}
+  />
+
+  <article class="article">
+    <div class="container">
+      <div class="article__body prose">
+        <slot />
+      </div>
+    </div>
+  </article>
+
+  <FootBlock
+    reviewedBy={props.reviewedBy}
+    lastUpdated={props.lastUpdated}
+  />
+
+  <CTABlock id="consultation" />
+</BaseLayout>
+
+<style>
+  .article {
+    padding-block: var(--space-12) var(--space-8);
+  }
+  @media (min-width: 1024px) {
+    .article { padding-block: var(--space-16) var(--space-12); }
+  }
+
+  .article__body {
+    max-width: var(--container-text);
+    margin-inline: auto;
+  }
+</style>

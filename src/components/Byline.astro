@@ -1,0 +1,109 @@
+---
+/**
+ * Byline — visible reviewer credit under H1 on every article page.
+ * Pulls from frontmatter `reviewed_by` (engine-produced) with a graceful
+ * fallback to the firm's default reviewing attorney.
+ */
+import { attorney } from '../lib/firmConfig';
+
+export interface Props {
+  /** "Maria L. Castro, CA Bar No. 242042" — from article frontmatter */
+  reviewedBy?: string;
+  /** ISO date string from frontmatter date_reviewed */
+  lastUpdated?: string;
+  /** Article frontmatter says AI-assisted with attorney review */
+  aiAssisted?: boolean;
+}
+
+const {
+  reviewedBy = `${attorney.name}, ${attorney.barState} Bar No. ${attorney.barNumber}`,
+  lastUpdated,
+  aiAssisted = true,
+} = Astro.props;
+
+const dateFormatted = lastUpdated
+  ? new Date(lastUpdated).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+  : null;
+---
+
+<div class="byline">
+  <div class="byline__main">
+    <span class="byline__label">Reviewed by</span>
+    <span class="byline__attorney">{reviewedBy}</span>
+  </div>
+  {(dateFormatted || aiAssisted) && (
+    <div class="byline__meta">
+      {dateFormatted && (
+        <span class="byline__updated">
+          <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <circle cx="6" cy="6" r="4.5"/>
+            <path d="M6 3 V6 L8 7.5" stroke-linecap="round"/>
+          </svg>
+          Last updated {dateFormatted}
+        </span>
+      )}
+      {aiAssisted && (
+        <span class="byline__ai-tag" title="Initial draft prepared with AI assistance; reviewed and approved by the named attorney before publication.">
+          AI-assisted draft, attorney-reviewed
+        </span>
+      )}
+    </div>
+  )}
+</div>
+
+<style>
+  .byline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-block: var(--space-5);
+    margin-bottom: var(--space-10);
+    border-block: 1px solid var(--color-rule);
+  }
+
+  .byline__main {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .byline__label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  .byline__attorney {
+    font-family: var(--font-display);
+    font-size: var(--text-md);
+    font-variation-settings: 'wght' 500, 'opsz' 28, 'wonk' 0;
+    letter-spacing: var(--tracking-snug);
+    color: var(--color-ink);
+  }
+
+  .byline__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    font-family: var(--font-body);
+    font-size: var(--text-xs);
+    color: var(--color-ink-muted);
+  }
+
+  .byline__updated {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .byline__updated svg { color: var(--color-accent-warm); }
+
+  .byline__ai-tag {
+    color: var(--color-ink-muted);
+    cursor: help;
+    border-bottom: 1px dotted var(--color-rule-strong);
+  }
+</style>

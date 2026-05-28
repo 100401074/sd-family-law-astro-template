@@ -1,0 +1,113 @@
+/**
+ * Content collections schema — mirrors the frontmatter that the content engine
+ * emits. Adding new optional fields is safe; required fields must match what
+ * the engine produces or the build will fail. Run `npm run build` after adding
+ * new articles to verify the schema accepts them.
+ */
+import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
+
+const PageTypeEnum = z.enum([
+  'cost-article',
+  'explainer',
+  'faq',
+  'comparison',
+  'process-guide',
+  'city-page',
+  'landing',
+  'pillar',
+]);
+
+const SchemaTypeEnum = z.enum([
+  'Article',
+  'FAQPage',
+  'LegalService',
+  'LocalBusiness',
+  'SpeakableSpecification',
+  'HowTo',
+]);
+
+const StatuteCited = z.object({
+  citation: z.string(),
+  url: z.string().optional(),
+  last_verified: z.string().optional(),
+});
+
+const articles = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/articles' }),
+  schema: z.object({
+    // Core identity
+    title: z.string(),
+    slug: z.string().optional(),
+    description: z.string(),
+    page_type: PageTypeEnum,
+
+    // SEO + Open Graph
+    og_title: z.string().optional(),
+    og_description: z.string().optional(),
+    og_image: z.string().optional(),
+    featured_image: z.string().optional(),
+    twitter_card: z.string().optional().default('summary_large_image'),
+
+    // Dates + authorship
+    date_published: z.string().optional(),
+    date_reviewed: z.string().optional(),
+    reviewed_by: z.string().optional(),
+
+    // AI disclosure
+    ai_assisted: z.boolean().optional().default(true),
+    ai_assisted_disclosure: z.string().optional(),
+
+    // Schema metadata
+    schema_types: z.array(SchemaTypeEnum).optional().default(['Article']),
+    speakable_selectors: z.array(z.string()).optional(),
+
+    // Pillar marker
+    is_pillar: z.boolean().optional().default(false),
+
+    // Jurisdictional context
+    geographic_focus: z.string().optional(),
+    jurisdiction: z.string().optional().default('CA'),
+
+    // Citation list (rendered in Sources section if present)
+    statutes_cited: z.array(StatuteCited).optional().default([]),
+
+    // For comparison pages: structured options
+    comparison: z.object({
+      a: z.object({
+        kicker: z.string().optional(),
+        name: z.string(),
+        statuteBasis: z.string().optional(),
+        summary: z.string(),
+        whenItFits: z.array(z.string()).optional(),
+      }),
+      b: z.object({
+        kicker: z.string().optional(),
+        name: z.string(),
+        statuteBasis: z.string().optional(),
+        summary: z.string(),
+        whenItFits: z.array(z.string()).optional(),
+      }),
+    }).optional(),
+
+    // For FAQ pages: structured Q&A list (optional, otherwise extracted from body H3s)
+    faq_items: z.array(z.object({
+      question: z.string(),
+      answer: z.string(),
+    })).optional(),
+
+    // For process guide: structured steps
+    process_steps: z.array(z.object({
+      title: z.string(),
+      body: z.string(),
+      duration: z.string().optional(),
+      form: z.string().optional(),
+      cost: z.string().optional(),
+    })).optional(),
+
+    // Order on the index page; lower numbers appear first
+    order: z.number().optional().default(100),
+  }),
+});
+
+export const collections = { articles };

@@ -1,0 +1,127 @@
+---
+/**
+ * FAQAccordion — interactive accordion using <details> for the Q&A list.
+ * No JS dependency required. Each <details> can be expanded individually.
+ *
+ * On the FAQ layout, this is the primary content treatment. On other layouts
+ * (e.g., explainer, landing) where FAQ appears as a secondary section, it
+ * still uses this same component for consistency.
+ */
+export interface FAQItem {
+  question: string;
+  answer: string; /* HTML allowed */
+}
+
+export interface Props {
+  items: FAQItem[];
+  /** Set headingLevel to "h2" for a section context, "h3" if nested under an h2. Default "h3". */
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { items, headingLevel = 'h3' } = Astro.props;
+const HeadingTag = headingLevel;
+---
+
+<div class="faq-accordion">
+  {items.map((item, idx) => (
+    <details class="faq-item" name="faq-group" open={idx === 0}>
+      <summary class="faq-item__summary">
+        <span class="faq-item__index">Q{String(idx + 1).padStart(2, '0')}</span>
+        <HeadingTag class="faq-item__question">{item.question}</HeadingTag>
+        <span class="faq-item__chevron" aria-hidden="true">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 6 L8 10 L12 6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </summary>
+      <div class="faq-item__answer" set:html={item.answer} />
+    </details>
+  ))}
+</div>
+
+<style>
+  .faq-accordion {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--color-rule);
+  }
+
+  .faq-item {
+    border-bottom: 1px solid var(--color-rule);
+    transition: background var(--duration-base) var(--easing-soft);
+  }
+  .faq-item[open] { background: var(--color-tint-warm); }
+
+  .faq-item__summary {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: baseline;
+    gap: var(--space-5);
+    padding: var(--space-6) var(--space-4);
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+  .faq-item__summary::-webkit-details-marker { display: none; }
+  .faq-item__summary:hover .faq-item__question { color: var(--color-accent); }
+
+  .faq-item__index {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-wider);
+    color: var(--color-accent-warm);
+    padding-top: 0.25em;
+  }
+
+  .faq-item__question {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-variation-settings: 'wght' 500, 'opsz' 28, 'wonk' 0;
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-snug);
+    color: var(--color-ink);
+    margin: 0;
+    transition: color var(--duration-quick) var(--easing-soft);
+    text-wrap: balance;
+  }
+
+  .faq-item__chevron {
+    color: var(--color-ink-muted);
+    transition: transform var(--duration-base) var(--easing-soft);
+    padding-top: 0.4em;
+  }
+  .faq-item[open] .faq-item__chevron { transform: rotate(-180deg); }
+
+  .faq-item__answer {
+    padding: 0 var(--space-4) var(--space-7) calc(var(--space-4) + 3rem);
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    line-height: var(--leading-prose);
+    color: var(--color-ink-soft);
+    max-width: 60ch;
+  }
+  .faq-item__answer :global(p) { margin-bottom: var(--space-3); }
+  .faq-item__answer :global(p:last-child) { margin-bottom: 0; }
+  .faq-item__answer :global(strong) { color: var(--color-ink); font-weight: 600; }
+  .faq-item__answer :global(a) {
+    color: var(--color-accent);
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 100% 1px;
+  }
+  .faq-item__answer :global(a:hover) {
+    color: var(--color-accent-warm);
+    background-size: 100% 2px;
+  }
+
+  @media (max-width: 640px) {
+    .faq-item__summary {
+      grid-template-columns: 1fr auto;
+      gap: var(--space-3);
+    }
+    .faq-item__index { display: none; }
+    .faq-item__answer { padding-left: var(--space-4); }
+  }
+</style>

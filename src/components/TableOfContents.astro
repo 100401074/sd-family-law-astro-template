@@ -1,0 +1,127 @@
+---
+/**
+ * TableOfContents — sticky sidebar TOC for Pillar / long-form articles.
+ * Highlights the currently-visible section using IntersectionObserver.
+ *
+ * Expects a `headings` array shaped like Astro's getHeadings() output.
+ */
+export interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+export interface Props {
+  headings: Heading[];
+  /** Only show headings of these depths. Default [2] = H2 only. */
+  depths?: number[];
+}
+
+const { headings, depths = [2] } = Astro.props;
+const items = headings.filter((h) => depths.includes(h.depth));
+---
+
+{items.length > 0 && (
+  <nav class="toc" aria-label="Table of contents">
+    <p class="toc__label">In this guide</p>
+    <ol class="toc__list">
+      {items.map((h, idx) => (
+        <li class="toc__item">
+          <a href={`#${h.slug}`} class="toc__link" data-toc-target={h.slug}>
+            <span class="toc__index">{String(idx + 1).padStart(2, '0')}</span>
+            <span class="toc__text">{h.text}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<style>
+  .toc {
+    font-family: var(--font-body);
+    border-top: 2px solid var(--color-accent-warm);
+    padding-top: var(--space-5);
+  }
+
+  .toc__label {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    color: var(--color-accent-warm);
+    margin: 0 0 var(--space-5);
+  }
+
+  .toc__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    counter-reset: toc;
+  }
+
+  .toc__item {
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .toc__item:last-child { border-bottom: 0; }
+
+  .toc__link {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
+    color: var(--color-ink-soft);
+    background: none !important;
+    transition: color var(--duration-quick) var(--easing-soft);
+    align-items: baseline;
+  }
+  .toc__link:hover { color: var(--color-ink); }
+  .toc__link[data-active] { color: var(--color-accent); }
+  .toc__link[data-active] .toc__index { color: var(--color-accent-warm); }
+
+  .toc__index {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-ink-muted);
+    transition: color var(--duration-quick) var(--easing-soft);
+  }
+
+  .toc__text {
+    font-size: var(--text-sm);
+    line-height: var(--leading-snug);
+  }
+</style>
+
+<script>
+  // Highlight the currently-visible heading in the TOC
+  const links = document.querySelectorAll<HTMLAnchorElement>('[data-toc-target]');
+  const targets = new Map<string, HTMLElement>();
+
+  links.forEach((link) => {
+    const slug = link.dataset.tocTarget!;
+    const el = document.getElementById(slug);
+    if (el) targets.set(slug, el);
+  });
+
+  if (targets.size > 0 && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            links.forEach((link) => link.removeAttribute('data-active'));
+            const slug = entry.target.id;
+            const link = document.querySelector(`[data-toc-target="${slug}"]`);
+            link?.setAttribute('data-active', '');
+          }
+        });
+      },
+      { rootMargin: '-20% 0px -60% 0px', threshold: 0 }
+    );
+
+    targets.forEach((el) => observer.observe(el));
+  }
+</script>

@@ -1,0 +1,21 @@
+{
+  "name": "sd-family-law-astro-template",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "Astro reference template for San Diego Family Law Advocates — renders content-engine markdown output with refined coastal-professional design.",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^5.0.0",
+    "@astrojs/sitemap": "^3.2.0",
+    "@astrojs/mdx": "^4.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

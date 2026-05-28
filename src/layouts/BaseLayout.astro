@@ -1,0 +1,103 @@
+---
+/**
+ * BaseLayout — root HTML shell for every page.
+ * Wraps the Header + Footer chrome around the route's main content slot.
+ *
+ * Props:
+ *   - title:       Page <title> (will be suffixed with the firm short name)
+ *   - description: <meta name="description"> for SEO + OG
+ *   - ogImage:     URL of the Open Graph card image (optional, falls back to site default)
+ *   - canonical:   Canonical URL; if omitted, derives from Astro.url
+ *   - jsonLd:      Pre-built JSON-LD objects to inject in <head> (Article, FAQPage, etc.)
+ */
+import '../styles/global.css';
+import { firmConfig, firm } from '../lib/firmConfig';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+export interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  canonical?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const { title, description, ogImage, canonical, jsonLd } = Astro.props;
+
+const pageTitle = title.includes(firm.shortName) || title.includes(firm.name)
+  ? title
+  : `${title} — ${firm.shortName}`;
+
+const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toString();
+const ogImageUrl = ogImage ?? new URL('/og-default.jpg', Astro.site).toString();
+
+const jsonLdArray = Array.isArray(jsonLd) ? jsonLd : (jsonLd ? [jsonLd] : []);
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#1F3A4D" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:site_name" content={firm.name} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- JSON-LD injection -->
+    {jsonLdArray.map((obj) => (
+      <script type="application/ld+json" set:html={JSON.stringify(obj)} />
+    ))}
+
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <div class="page">
+      <Header />
+      <main id="main" class="main">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+
+    <style>
+      .skip-link {
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        background: var(--color-accent);
+        color: white;
+        padding: var(--space-3) var(--space-5);
+        z-index: 100;
+      }
+      .skip-link:focus {
+        left: var(--space-4);
+        top: var(--space-4);
+      }
+
+      .main { flex: 1; }
+    </style>
+  </body>
+</html>

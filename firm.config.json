@@ -1,0 +1,66 @@
+{
+  "firm": {
+    "name": "San Diego Family Law Advocates",
+    "shortName": "SDFLA",
+    "tagline": "Counsel without judgment. Family law guidance for the moments that matter most.",
+    "phone": "858-888-8000",
+    "phoneDisplay": "(858) 888-8000",
+    "hours": "7 days a week",
+    "intakeUrl": "https://sdfamilylawadvocates.com/contact",
+    "consultationOffer": "free, confidential consultation",
+    "address": {
+      "street": "401 W A St, Suite 200",
+      "city": "San Diego",
+      "state": "CA",
+      "postalCode": "92101"
+    },
+    "geoLat": 32.7157,
+    "geoLng": -117.1611,
+    "primaryAreasServed": [
+      "San Diego",
+      "Chula Vista",
+      "El Cajon",
+      "Escondido",
+      "Oceanside",
+      "Carlsbad",
+      "La Mesa"
+    ]
+  },
+  "attorney": {
+    "name": "Maria L. Castro",
+    "title": "Senior Family Law Attorney",
+    "barState": "CA",
+    "barNumber": "242042",
+    "admissionYear": "2005",
+    "stateBarProfileUrl": "https://members.calbar.ca.gov/fal/Member/Detail/242042"
+  },
+  "credentials": [
+    { "label": "California State Bar", "imageSlot": "calbar.svg" },
+    { "label": "Super Lawyers", "imageSlot": "superlawyers.svg" },
+    { "label": "Avvo Rating", "imageSlot": "avvo.svg" },
+    { "label": "AAML Fellow", "imageSlot": "aaml.svg" }
+  ],
+  "practiceAreas": [
+    { "slug": "divorce", "title": "Divorce & Dissolution", "summary": "Contested and uncontested divorce under the California Family Code." },
+    { "slug": "high-asset-divorce", "title": "High-Asset Divorce", "summary": "Complex property division, business valuations, and forensic accounting." },
+    { "slug": "child-custody", "title": "Child Custody & Visitation", "summary": "Best-interest analysis under Cal. Fam. Code § 3011." },
+    { "slug": "child-support", "title": "Child Support", "summary": "Guideline calculations under Cal. Fam. Code § 4055 and add-ons." },
+    { "slug": "spousal-support", "title": "Spousal Support", "summary": "§ 4320 factors and the long-term planning that goes with them." },
+    { "slug": "property-division", "title": "Property Division", "summary": "Community property under § 760 and tracing separate property claims." },
+    { "slug": "legal-separation", "title": "Legal Separation", "summary": "An alternative path to court-enforceable orders without dissolution." },
+    { "slug": "military-divorce", "title": "Military Divorce", "summary": "USFSPA, SBP, and the federal layer on top of California law." }
+  ],
+  "navigation": {
+    "primary": [
+      { "label": "Practice Areas", "href": "/practice-areas" },
+      { "label": "Guides", "href": "/guides" },
+      { "label": "Calculators", "href": "/calculators" },
+      { "label": "About", "href": "/about" },
+      { "label": "Contact", "href": "/contact" }
+    ]
+  },
+  "social": {
+    "url": "https://sdfamilylawadvocates.com",
+    "logoUrl": "https://sdfamilylawadvocates.com/logo.png"
+  }
+}

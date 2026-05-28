@@ -1,0 +1,124 @@
+---
+/**
+ * Home / Landing — full landing page for San Diego Family Law Advocates.
+ *
+ * Composition order:
+ *   1. Hero (photo-led or atmospheric, dual CTA, credibility plate)
+ *   2. Credentials strip
+ *   3. Where to start (three-card intent router)
+ *   4. Practice areas grid
+ *   5. Brief promise / approach section (typographic)
+ *   6. CTA block (Steve's approved closing)
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Credentials from '../components/Credentials.astro';
+import WhereToStart from '../components/WhereToStart.astro';
+import PracticeAreaGrid from '../components/PracticeAreaGrid.astro';
+import CTABlock from '../components/CTABlock.astro';
+import { firm } from '../lib/firmConfig';
+---
+
+<BaseLayout
+  title={firm.name}
+  description={firm.tagline}
+>
+  <Hero />
+
+  <Credentials />
+
+  <WhereToStart />
+
+  <PracticeAreaGrid />
+
+  <section class="promise section">
+    <div class="container container--narrow">
+      <p class="kicker promise__kicker">Our approach</p>
+      <h2 class="promise__headline">
+        We treat the first conversation<br />
+        <span class="promise__em">like it actually matters.</span>
+      </h2>
+      <div class="promise__columns">
+        <div class="promise__col">
+          <h3 class="promise__col-title">No script.</h3>
+          <p>The first call is a real conversation. We listen to what's happening, ask the questions that actually move the case forward, and tell you what we'd do if we were in your seat.</p>
+        </div>
+        <div class="promise__col">
+          <h3 class="promise__col-title">No pressure.</h3>
+          <p>No retainer signature in the first call. No urgency tactics. If we're the right firm for your case, you'll know. If we're not, we'll point you somewhere better.</p>
+        </div>
+        <div class="promise__col">
+          <h3 class="promise__col-title">No fluff.</h3>
+          <p>Clear answers about residency, community property, custody, and timelines. Range-based costs, not single-point claims. Plain English, every time.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CTABlock
+    eyebrow="Free consultation"
+    id="consultation"
+  />
+</BaseLayout>
+
+<style>
+  .promise {
+    background: var(--color-ground);
+    text-align: center;
+  }
+
+  .promise__kicker {
+    margin-bottom: var(--space-3);
+  }
+
+  .promise__headline {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4.5vw, 3.25rem);
+    font-variation-settings: 'wght' 500, 'opsz' 80, 'wonk' 1;
+    line-height: 1.1;
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-ink);
+    margin-bottom: var(--space-16);
+    text-wrap: balance;
+  }
+  .promise__em {
+    font-style: italic;
+    color: var(--color-accent);
+    font-variation-settings: 'wght' 400, 'opsz' 80, 'wonk' 1;
+  }
+
+  .promise__columns {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-10);
+    text-align: left;
+  }
+  @media (min-width: 768px) {
+    .promise__columns {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-12);
+    }
+  }
+
+  .promise__col {
+    border-top: 2px solid var(--color-accent-warm);
+    padding-top: var(--space-6);
+  }
+
+  .promise__col-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-variation-settings: 'wght' 500, 'opsz' 36, 'wonk' 0;
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-ink);
+    margin-bottom: var(--space-3);
+  }
+
+  .promise__col p {
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--color-ink-soft);
+    margin: 0;
+  }
+</style>

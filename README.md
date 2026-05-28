@@ -130,7 +130,38 @@ Supported `page_type` values:
 
 ---
 
-## Adding a real admin (CMS)
+## Wired to Payload CMS
+
+This template is paired with a Payload v3 instance at
+[`sd-family-law-payload-cms`](https://github.com/100401074/sd-family-law-payload-cms).
+
+**At build time:**
+- If `PAYLOAD_API_URL` env var is set, the articles collection fetches from
+  Payload's REST API (`/api/articles?where[status][equals]=published`).
+- The Lexical rich-text bodies are converted to markdown via
+  [`src/lib/lexicalToMarkdown.ts`](src/lib/lexicalToMarkdown.ts) so Astro's
+  standard markdown renderer takes over from there.
+- If `PAYLOAD_API_URL` is not set OR the fetch fails, the loader falls back to
+  the markdown glob loader (`src/content/articles/*.md`) so local dev keeps
+  working without a Payload server.
+
+**At edit time:**
+- Editors save in the Payload admin UI at https://sdfla-cms.kallada.me/admin.
+- Payload's `afterChange` hook fires the Coolify deploy webhook for the
+  Astro app — set `ASTRO_REBUILD_WEBHOOK` env var on the Payload deploy.
+- Astro rebuilds (~30s) and the live site updates.
+
+**Env vars for production builds:**
+
+| Var | Purpose |
+|---|---|
+| `PAYLOAD_API_URL` | e.g., `https://sdfla-cms.kallada.me` — switches loader from markdown to Payload |
+| `PAYLOAD_API_KEY` | Optional; only needed if you restrict read access on the Articles collection |
+
+Without `PAYLOAD_API_URL`, the build uses the bundled markdown samples — handy
+for local dev and for keeping the demo deployable without external dependencies.
+
+## Adding another CMS (Decap / Sveltia / Tina)
 
 The included `/admin` page is a static **preview tool** — it lets you edit `firm.config.json` values in the browser and download the updated JSON. It does not persist changes to disk.
 

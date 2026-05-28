@@ -1,11 +1,16 @@
 /**
  * Content collections schema — mirrors the frontmatter that the content engine
- * emits. Adding new optional fields is safe; required fields must match what
- * the engine produces or the build will fail. Run `npm run build` after adding
- * new articles to verify the schema accepts them.
+ * emits AND the shape Payload CMS returns (see src/lib/payloadLoader.ts for
+ * the field-by-field mapping).
+ *
+ * Loader selection at build time:
+ *   - If PAYLOAD_API_URL env var is set, use the Payload loader.
+ *   - Otherwise fall back to the markdown glob loader (src/content/articles/*.md).
+ *   - For local dev with no Payload reachable, the glob fallback keeps you working.
  */
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { payloadLoader } from './lib/payloadLoader';
 
 const PageTypeEnum = z.enum([
   'cost-article',
@@ -33,8 +38,12 @@ const StatuteCited = z.object({
   last_verified: z.string().optional(),
 });
 
+const USE_PAYLOAD = !!process.env.PAYLOAD_API_URL;
+
 const articles = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/articles' }),
+  loader: USE_PAYLOAD
+    ? payloadLoader()
+    : glob({ pattern: '**/*.{md,mdx}', base: './src/content/articles' }),
   schema: z.object({
     // Core identity
     title: z.string(),

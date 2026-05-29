@@ -38,11 +38,16 @@ const StatuteCited = z.object({
   last_verified: z.string().optional(),
 });
 
-const USE_PAYLOAD = !!process.env.PAYLOAD_API_URL;
+// Payload CMS URL. Tries env var first (for portability across brands /
+// preview deploys); falls back to the SDFLA production CMS so the build
+// still pulls live content even when the build platform fails to forward
+// the build-arg (we hit this on Coolify — env was in the build shell but
+// not in the docker --build-arg list).
+const PAYLOAD_URL = process.env.PAYLOAD_API_URL || 'https://sdfla-cms.kallada.me';
 
 const articles = defineCollection({
-  loader: USE_PAYLOAD
-    ? payloadLoader()
+  loader: PAYLOAD_URL
+    ? payloadLoader({ apiUrl: PAYLOAD_URL })
     : glob({ pattern: '**/*.{md,mdx}', base: './src/content/articles' }),
   schema: z.object({
     // Core identity

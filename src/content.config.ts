@@ -42,8 +42,9 @@ const StatuteCited = z.object({
 // preview deploys); falls back to the SDFLA production CMS so the build
 // still pulls live content even when the build platform fails to forward
 // the build-arg (we hit this on Coolify — env was in the build shell but
-// not in the docker --build-arg list).
-const PAYLOAD_URL = process.env.PAYLOAD_API_URL || 'https://sdfla-cms.kallada.me';
+// not in the docker --build-arg list). Payload now runs on Steve's EC2
+// with RDS-backed Postgres; the Hostinger Coolify variant is decommissioned.
+const PAYLOAD_URL = process.env.PAYLOAD_API_URL || 'https://sdflacms.duckdns.org';
 
 const articles = defineCollection({
   loader: PAYLOAD_URL

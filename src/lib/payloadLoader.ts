@@ -159,7 +159,13 @@ function articleToEntry(article: PayloadArticle): { id: string; data: Record<str
     is_pillar: article.is_pillar ?? false,
     geographic_focus: article.geographic_focus,
     jurisdiction: article.jurisdiction ?? 'CA',
-    statutes_cited: article.statutes_cited ?? [],
+    // Payload stores unset optional fields as null; Astro's zod schema uses
+    // `.optional()` which accepts undefined but rejects null. Normalize.
+    statutes_cited: (article.statutes_cited ?? []).map((s) => ({
+      citation: s.citation,
+      url: s.url ?? undefined,
+      last_verified: s.last_verified ?? undefined,
+    })),
     faq_items: article.faq_items,
     process_steps: article.process_steps,
     order: article.order ?? 100,
@@ -178,9 +184,27 @@ function articleToEntry(article: PayloadArticle): { id: string; data: Record<str
     };
   }
 
-  // Strip undefined keys so Astro's zod schema doesn't see explicit undefined
+  // Strip undefined keys so Astro's zod schema doesn't see explicit undefined.
+  // Also convert any remaining null values (Payload uses null for unset
+  // optional fields; Astro's z.string().optional() rejects null) to
+  // undefined recursively so downstream schema validation passes.
+  const stripNulls = (v: unknown): unknown => {
+    if (v === null) return undefined;
+    if (Array.isArray(v)) return v.map(stripNulls);
+    if (v && typeof v === 'object') {
+      const out: Record<string, unknown> = {};
+      for (const [k, val] of Object.entries(v)) {
+        const nv = stripNulls(val);
+        if (nv !== undefined) out[k] = nv;
+      }
+      return out;
+    }
+    return v;
+  };
   for (const k of Object.keys(data)) {
-    if (data[k] === undefined) delete data[k];
+    const v = stripNulls(data[k]);
+    if (v === undefined) delete data[k];
+    else data[k] = v;
   }
 
   return { id: article.slug, data, body };

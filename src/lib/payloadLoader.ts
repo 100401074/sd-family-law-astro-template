@@ -16,7 +16,19 @@
  */
 
 import type { Loader, LoaderContext } from 'astro/loaders';
+import { createMarkdownProcessor, type MarkdownProcessor } from '@astrojs/markdown-remark';
 import { lexicalToMarkdown, type LexicalRichText } from './lexicalToMarkdown';
+
+let _markdownProcessor: MarkdownProcessor | null = null;
+async function getMarkdownProcessor(): Promise<MarkdownProcessor> {
+  if (!_markdownProcessor) {
+    _markdownProcessor = await createMarkdownProcessor({
+      gfm: true,
+      smartypants: true,
+    });
+  }
+  return _markdownProcessor;
+}
 
 export interface PayloadArticleAPIResponse {
   docs: PayloadArticle[];
@@ -287,14 +299,25 @@ export function payloadLoader(opts: PayloadLoaderOptions = {}): Loader {
         return;
       }
 
+      const markdown = await getMarkdownProcessor();
+
       ctx.store.clear();
       for (const article of articles) {
         const entry = articleToEntry(article);
         const parsed = await ctx.parseData({ id: entry.id, data: entry.data });
+        const { code: html, metadata } = await markdown.render(entry.body);
         ctx.store.set({
           id: entry.id,
           data: parsed,
           body: entry.body,
+          rendered: {
+            html,
+            metadata: {
+              headings: metadata.headings ?? [],
+              imagePaths: Array.from(metadata.imagePaths ?? []),
+              frontmatter: parsed,
+            },
+          },
           digest: ctx.generateDigest({ id: entry.id, data: parsed, body: entry.body }),
         });
       }

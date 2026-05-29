@@ -86,22 +86,23 @@ const articles = defineCollection({
     // Citation list (rendered in Sources section if present)
     statutes_cited: z.array(StatuteCited).optional().default([]),
 
-    // For comparison pages: structured options
+    // For comparison pages: structured options. All fields optional so
+    // non-comparison articles (which don't populate this group) still validate.
     comparison: z.object({
       a: z.object({
         kicker: z.string().optional(),
-        name: z.string(),
+        name: z.string().optional(),
         statuteBasis: z.string().optional(),
-        summary: z.string(),
+        summary: z.string().optional(),
         whenItFits: z.array(z.string()).optional(),
-      }),
+      }).optional(),
       b: z.object({
         kicker: z.string().optional(),
-        name: z.string(),
+        name: z.string().optional(),
         statuteBasis: z.string().optional(),
-        summary: z.string(),
+        summary: z.string().optional(),
         whenItFits: z.array(z.string()).optional(),
-      }),
+      }).optional(),
     }).optional(),
 
     // For FAQ pages: structured Q&A list (optional, otherwise extracted from body H3s)
@@ -110,10 +111,11 @@ const articles = defineCollection({
       answer: z.string(),
     })).optional(),
 
-    // For process guide: structured steps
+    // For process guide: structured steps. Title/body relaxed to optional
+    // to match the loosened Payload schema.
     process_steps: z.array(z.object({
-      title: z.string(),
-      body: z.string(),
+      title: z.string().optional(),
+      body: z.string().optional(),
       duration: z.string().optional(),
       form: z.string().optional(),
       cost: z.string().optional(),

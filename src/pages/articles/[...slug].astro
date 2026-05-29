@@ -110,7 +110,7 @@ const commonProps = {
 ) : data.page_type === 'comparison' ? (
   <ArticleLayout {...commonProps}>
     <Content />
-    {data.comparison && (
+    {data.comparison?.a?.name && data.comparison?.b?.name && (
       <ComparisonSpread optionA={data.comparison.a} optionB={data.comparison.b} />
     )}
     {data.statutes_cited && data.statutes_cited.length > 0 && (
